@@ -29,7 +29,7 @@ If no paid providers succeed, local effects still work for the supported command
 ## How It Works
 - `app/page.tsx`: uploads, prompt input, local processing (background removal via WASM, grayscale, warm tone, watercolor), then POSTs to `/api/edit` if needed.
 - `app/api/edit/route.ts`: tries available providers in order and returns the first successful image URL/data URI; errors are aggregated for visibility.
-- `components/*`: `ImageUploader`, `PromptInput`, `ResultDisplay`.
+- `components/*`: `Image Uploader`, `Prompt Input`, `Result Display`.
 
 ## Common Commands
 - Local: “remove background”, “make it black and white”, “add warm sunset lighting”, “turn into a watercolor painting”.
@@ -38,3 +38,4 @@ If no paid providers succeed, local effects still work for the supported command
 ## Notes
 - First local background removal may take a moment to download WASM/ONNX assets.
 - Lint may warn about `<img>` usage; keep or swap to `next/image` if desired.
+- Only few feature are available ( like : remove background, make it black and white, add warm sunset lighting, turn into a watercolor            painting) Due to limit usage of API 
