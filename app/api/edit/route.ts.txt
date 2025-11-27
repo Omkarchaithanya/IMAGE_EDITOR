@@ -1,0 +1,64 @@
+import { NextRequest, NextResponse } from 'next/server';
+import Replicate from 'replicate';
+
+const replicate = new Replicate({
+  auth: process.env.REPLICATE_API_TOKEN!,
+});
+
+export async function POST(req: NextRequest) {
+  try {
+    const { image, prompt } = await req.json();
+
+    if (!image || !prompt) {
+      return NextResponse.json(
+        { error: 'Image and prompt are required' },
+        { status: 400 }
+      );
+    }
+
+    console.log('Processing request with prompt:', prompt);
+
+    // Determine which model to use based on prompt
+    let output;
+
+    if (prompt.toLowerCase().includes('remove background')) {
+      // Background removal model
+      output = await replicate.run(
+        "cjwbw/rembg:fb8af171cfa1616ddcf1242c093f9c46bcada5ad4cf6f2fbe8b81b330ec5c003",
+        { 
+          input: { 
+            image: image 
+          } 
+        }
+      );
+    } else {
+      // Image-to-image transformation with Stable Diffusion
+      output = await replicate.run(
+        "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
+        {
+          input: {
+            image: image,
+            prompt: prompt,
+            num_inference_steps: 25,
+            guidance_scale: 7.5,
+          }
+        }
+      );
+    }
+
+    // Handle array output (some models return arrays)
+    const resultUrl = Array.isArray(output) ? output[0] : output;
+
+    return NextResponse.json({ 
+      result: resultUrl,
+      success: true 
+    });
+
+  } catch (error: any) {
+    console.error('API Error:', error);
+    return NextResponse.json(
+      { error: error.message || 'Failed to process image' },
+      { status: 500 }
+    );
+  }
+}
